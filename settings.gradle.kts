@@ -19,6 +19,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "TaskMate"
+rootProject.name = "Task Manager"
 include(":app")
  

@@ -2,14 +2,18 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    kotlin("kapt")
+
+    id("kotlin-kapt")
+
 }
 
 android {
-    namespace = "com.example.taskmate"
+    namespace = "com.example.taskmanager"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.taskmate"
+        applicationId = "com.example.taskmanager"
         minSdk = 24
         targetSdk = 35
         versionCode = 1
@@ -28,6 +32,9 @@ android {
         }
     }
     compileOptions {
+
+        isCoreLibraryDesugaringEnabled = true
+
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
@@ -40,6 +47,24 @@ android {
 }
 
 dependencies {
+
+    val nav_version = "2.7.5"
+    val compose_version = "1.6.0-alpha08"
+    val room = "2.6.0"
+
+    // Room
+    implementation("androidx.room:room-runtime:$room")
+    implementation("androidx.room:room-ktx:$room")
+    kapt("androidx.room:room-compiler:$room") // Add a plugin id("kotlin-kapt") for this line to work
+
+    implementation("androidx.navigation:navigation-compose:$nav_version")
+    implementation("androidx.core:core-ktx:1.12.0")
+    implementation("androidx.compose.ui:ui:$compose_version")
+    implementation("androidx.compose.material:material:$compose_version")
+    implementation("androidx.compose.ui:ui-tooling-preview:$compose_version")
+
+    implementation("io.github.vanpra.compose-material-dialogs:datetime:0.8.1-rc")
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:1.1.6")
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
