@@ -5,37 +5,20 @@ import androidx.annotation.RequiresApi
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.Card
-import androidx.compose.material.DismissDirection
-import androidx.compose.material.DismissValue
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.FloatingActionButton
-import androidx.compose.material.FractionalThreshold
-import androidx.compose.material.Icon
-import androidx.compose.material.Scaffold
-import androidx.compose.material.SwipeToDismiss
-import androidx.compose.material.Text
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.rememberDismissState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -46,36 +29,32 @@ import com.example.taskmanager.data.Task
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun HomeView(navController: NavController, viewModel: TaskViewModel) {
-//    val colorDefault = painterResource(R.color.app_background_color)
-
     Scaffold(
         topBar = { AppBar(title = "Task List", {}) },
         floatingActionButton = {
             FloatingActionButton(
                 modifier = Modifier.padding(16.dp),
                 contentColor = Color.White,
-                backgroundColor = Color.Black,
-                onClick = {
-                    // TODO Add navigation to Add screen
-                    navController.navigate(Screen.AddEditScreen.route + "/0L")
-                }
+                backgroundColor = MaterialTheme.colors.primary,
+                onClick = { navController.navigate(Screen.AddEditScreen.route + "/0L") }
             ) {
-                Icon(imageVector = Icons.Default.Add, contentDescription = null)
+                Icon(imageVector = Icons.Default.Add, contentDescription = "Add Task")
             }
         }
-    ) {
+    ) { innerPadding ->
         val taskList = viewModel.getAllTasks.collectAsState(initial = listOf())
-        LazyColumn(modifier = Modifier
-            .fillMaxSize()
-            .padding(it)
-            .background(color = colorResource(R.color.app_background_color))) {
-            //  TODO Add Items
-            items(items = taskList.value, key = { task -> task.id ?: 0}) { task ->
-
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .background(MaterialTheme.colors.background)
+        ) {
+            items(items = taskList.value, key = { task -> task.id ?: 0 }) { task ->
                 val dismissState = rememberDismissState(
                     confirmStateChange = {
-                        if(it == DismissValue.DismissedToStart)
+                        if (it == DismissValue.DismissedToStart) {
                             viewModel.deleteTask(task)
+                        }
                         true
                     }
                 )
@@ -83,26 +62,32 @@ fun HomeView(navController: NavController, viewModel: TaskViewModel) {
                     state = dismissState,
                     background = {
                         val color by animateColorAsState(
-                            if(dismissState.dismissDirection == DismissDirection.EndToStart) Color.Red else Color.Transparent,
-                            label = "Delete Color Animation"
+                            if (dismissState.dismissDirection == DismissDirection.EndToStart) Color.Red else Color.Transparent
                         )
-                        val alignment = Alignment.CenterEnd
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()
                                 .background(color)
                                 .padding(horizontal = 20.dp),
-                            contentAlignment = alignment
-                        ) { Icon(Icons.Default.Delete, contentDescription = "Delete Icon", tint = Color.White) }
+                            contentAlignment = Alignment.CenterEnd
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Delete,
+                                contentDescription = "Delete Icon",
+                                tint = Color.White
+                            )
+                        }
                     },
                     directions = setOf(DismissDirection.EndToStart),
-                    dismissThresholds ={ FractionalThreshold(0.5f) }
-
+                    dismissThresholds = { FractionalThreshold(0.5f) }
                 ) {
-                    TaskItem(task, {
-                        val id = task.id
-                        navController.navigate(Screen.AddEditScreen.route + "/$id")
-                    })
+                    TaskItem(
+                        task = task,
+                        onClick = { navController.navigate(Screen.AddEditScreen.route + "/${task.id}") },
+                        onCheckedChange = { isChecked ->
+                            viewModel.updateTask(task.copy(isCompleted = isChecked))
+                        }
+                    )
                 }
             }
         }
@@ -111,20 +96,49 @@ fun HomeView(navController: NavController, viewModel: TaskViewModel) {
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun TaskItem(task: Task, onClick: () -> Unit) {
+fun TaskItem(task: Task, onClick: () -> Unit, onCheckedChange: (Boolean) -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = 4.dp, start = 8.dp, end = 8.dp, bottom = 4.dp)
+            .padding(horizontal = 12.dp, vertical = 6.dp)
             .clickable { onClick() },
-        elevation = 10.dp
+        shape = RoundedCornerShape(16.dp),
+        elevation = 8.dp
     ) {
-        Column(modifier = Modifier.padding(10.dp)) {
-            Text(text = task.taskTitle, fontWeight = FontWeight.ExtraBold, fontSize = 20.sp)
-            Spacer(modifier = Modifier.height(8.dp))
-            Row {
-                Text(text = task.taskDate)
-                Text(text = task.lastModifiedDateTime, modifier = Modifier.padding(start = 80.dp))
+        Row(
+            modifier = Modifier.padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Checkbox(
+                checked = task.isCompleted,
+                onCheckedChange = onCheckedChange,
+                colors = CheckboxDefaults.colors(
+                    checkedColor = MaterialTheme.colors.primary,
+                    uncheckedColor = Color.Gray
+                )
+            )
+            Spacer(modifier = Modifier.width(12.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = task.taskTitle,
+                    style = MaterialTheme.typography.h6.copy(fontWeight = if (task.isCompleted) FontWeight.Normal else FontWeight.Bold)
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Row(
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        text = task.taskDate,
+                        style = MaterialTheme.typography.body2,
+                        color = Color.Gray
+                    )
+                    Text(
+                        text = task.lastModifiedDateTime,
+                        style = MaterialTheme.typography.body2,
+                        color = Color.Gray
+                    )
+                }
             }
         }
     }

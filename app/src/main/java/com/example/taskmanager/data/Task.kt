@@ -22,5 +22,8 @@ data class Task(
     val taskTime: String?,
 
     @ColumnInfo(name = "task-lastModifiedDateTime")
-    val lastModifiedDateTime: String = ""
+    val lastModifiedDateTime: String = "",
+
+    @ColumnInfo(name = "is-completed")
+    val isCompleted: Boolean = false
 )

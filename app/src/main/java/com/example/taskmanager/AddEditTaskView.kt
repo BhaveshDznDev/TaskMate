@@ -1,23 +1,13 @@
 package com.example.taskmanager
 
 import android.widget.Toast
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.material.Icon
-import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Text
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.rememberScaffoldState
-import androidx.compose.material3.Button
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
@@ -40,6 +30,7 @@ import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddEditTaskView(
     id: Long,
@@ -47,15 +38,14 @@ fun AddEditTaskView(
     navController: NavController
 ) {
     val context = LocalContext.current
-    val scaffoldState = rememberScaffoldState()
     val scope = rememberCoroutineScope()
 
-    if(id != 0L) {
+    if (id != 0L) {
         val task = viewModel.getTask(id).collectAsState(Task(0L, "", "", "", ""))
         viewModel.taskTitleState = task.value.taskTitle
-        viewModel.taskDescriptionState = task.value.taskDescription.toString()
+        viewModel.taskDescriptionState = task.value.taskDescription ?: ""
         viewModel.taskDateState = task.value.taskDate
-        viewModel.taskTimeState = task.value.taskTime.toString()
+        viewModel.taskTimeState = task.value.taskTime ?: ""
     } else {
         viewModel.taskTitleState = ""
         viewModel.taskDescriptionState = ""
@@ -71,26 +61,51 @@ fun AddEditTaskView(
     val timeDialogState = rememberMaterialDialogState()
 
     Scaffold(
-        scaffoldState = scaffoldState,
         topBar = {
-            AppBar(title = if(id == 0L) stringResource(R.string.add_task) else stringResource(R.string.update_task), {
-                // TODO NavigateUp
-                navController.navigateUp()
-        })
-    }) {
+            TopAppBar(
+                title = {
+                    Text(
+                        if (id == 0L) stringResource(R.string.add_task)
+                        else stringResource(R.string.update_task)
+                    )
+                },
+                navigationIcon = {
+                    IconButton(onClick = { navController.navigateUp() }) {
+                        Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimary
+                )
+            )
+        }
+    ) { innerPadding ->
         Column(
             modifier = Modifier
-                .padding(it)
-                .wrapContentSize()
-                .fillMaxWidth()
-                .padding(top = 20.dp),
+                .padding(innerPadding)
+                .padding(16.dp)
+                .fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            OutlinedTextField(value = viewModel.taskTitleState, onValueChange = { viewModel.taskTitleState = it }, label = { Text("Title") }, singleLine = true)
-            Spacer(modifier = Modifier.height(8.dp))
-            OutlinedTextField(value = viewModel.taskDescriptionState, onValueChange = { viewModel.taskDescriptionState = it }, label = { Text("Description") })
-            Spacer(modifier = Modifier.height(8.dp))
+            OutlinedTextField(
+                value = viewModel.taskTitleState,
+                onValueChange = { viewModel.taskTitleState = it },
+                label = { Text("Title") },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp)
+            )
+
+            OutlinedTextField(
+                value = viewModel.taskDescriptionState,
+                onValueChange = { viewModel.taskDescriptionState = it },
+                label = { Text("Description") },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp)
+            )
+
             OutlinedTextField(
                 value = viewModel.taskDateState,
                 onValueChange = { },
@@ -101,12 +116,14 @@ fun AddEditTaskView(
                         Icon(
                             imageVector = Icons.Default.DateRange,
                             contentDescription = "Date Picker",
-                            tint = Color.Cyan,
+                            tint = MaterialTheme.colorScheme.primary
                         )
                     }
-                }
+                },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp)
             )
-            Spacer(modifier = Modifier.height(8.dp))
+
             OutlinedTextField(
                 value = viewModel.taskTimeState,
                 onValueChange = { },
@@ -117,53 +134,61 @@ fun AddEditTaskView(
                         Icon(
                             imageVector = Icons.Default.Notifications,
                             contentDescription = "Time Picker",
-                            tint = Color.Cyan
+                            tint = MaterialTheme.colorScheme.primary
                         )
                     }
-                }
+                },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp)
             )
-            Spacer(modifier = Modifier.height(20.dp))
 
-            Button(onClick = {
-                if(viewModel.taskTitleState.isNotEmpty() && viewModel.taskDateState.isNotEmpty()) {
-                    if(id != 0L){
-                        // Update Task
-                        viewModel.update(
-                            Task(
-                                id = id,
-                                taskTitle = viewModel.taskTitleState.trim(),
-                                taskDescription = viewModel.taskDescriptionState.trim(),
-                                taskDate = viewModel.taskDateState.trim(),
-                                taskTime = viewModel.taskTimeState.trim(),
-                                lastModifiedDateTime = currentDatetime
+            Button(
+                onClick = {
+                    if (viewModel.taskTitleState.isNotEmpty() && viewModel.taskDateState.isNotEmpty()) {
+                        if (id != 0L) {
+                            viewModel.update(
+                                Task(
+                                    id = id,
+                                    taskTitle = viewModel.taskTitleState.trim(),
+                                    taskDescription = viewModel.taskDescriptionState.trim(),
+                                    taskDate = viewModel.taskDateState.trim(),
+                                    taskTime = viewModel.taskTimeState.trim(),
+                                    lastModifiedDateTime = currentDatetime
+                                )
                             )
-                        )
+                        } else {
+                            viewModel.addTask(
+                                Task(
+                                    taskTitle = viewModel.taskTitleState.trim(),
+                                    taskDescription = viewModel.taskDescriptionState.trim(),
+                                    taskDate = viewModel.taskDateState.trim(),
+                                    taskTime = viewModel.taskTimeState.trim(),
+                                    lastModifiedDateTime = currentDatetime
+                                )
+                            )
+                        }
+                        scope.launch { navController.navigateUp() }
                     } else {
-                        // Add Task
-                        viewModel.addTask(
-                            Task(
-                                taskTitle = viewModel.taskTitleState.trim(),
-                                taskDescription = viewModel.taskDescriptionState.trim(),
-                                taskDate = viewModel.taskDateState.trim(),
-                                taskTime = viewModel.taskTimeState.trim(),
-                                lastModifiedDateTime = currentDatetime
-                            )
-                        )
+                        Toast.makeText(context, "Enter title & date to create a task", Toast.LENGTH_LONG).show()
                     }
-                } else {
-                    Toast.makeText(context, "Enter title & date to create a task", Toast.LENGTH_LONG).show()
-                }
-                scope.launch {
-                    navController.navigateUp()
-                }
-            }) {
-                Text(text = if(id != 0L) stringResource(R.string.update_task) else stringResource(R.string.add_task)
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp),
+                shape = RoundedCornerShape(25.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
+                elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp)
+            ) {
+                Text(
+                    text = if (id != 0L) stringResource(R.string.update_task) else stringResource(R.string.add_task),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onPrimary
                 )
             }
         }
+
         MaterialDialog(
             dialogState = dateDialogState,
-            elevation = 10.dp,
             buttons = {
                 positiveButton(text = "Set")
                 negativeButton(text = "Cancel")
@@ -172,14 +197,14 @@ fun AddEditTaskView(
             datepicker(
                 initialDate = LocalDate.now(),
                 title = "Pick a date",
-                colors = DatePickerDefaults.colors(),
+                colors = DatePickerDefaults.colors()
             ) {
                 viewModel.taskDateState = it.format(DateTimeFormatter.ofPattern("dd MMM yyyy"))
             }
         }
+
         MaterialDialog(
             dialogState = timeDialogState,
-            elevation = 10.dp,
             buttons = {
                 positiveButton(text = "Set")
                 negativeButton(text = "Cancel")

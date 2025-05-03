@@ -7,47 +7,33 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 
 private val LightColors = lightColorScheme(
-    primary            = Purple500,
-    onPrimary          = White,
-    primaryContainer   = Purple100,
-    onPrimaryContainer = Black,
-
-    secondary            = Blue600,
-    onSecondary          = White,
-    secondaryContainer   = Blue100,
-    onSecondaryContainer = Black,
-
-    tertiary            = Orange600,
-    onTertiary          = White,
-    tertiaryContainer   = Orange100,
-    onTertiaryContainer = Black,
-
-    background     = White,
-    onBackground   = Gray900,
-    surface        = White,
-    onSurface      = Gray900,
+    primary = PrimaryColor,
+    onPrimary = OnPrimaryLight,
+    primaryContainer = PrimaryVariant,
+    onPrimaryContainer = OnPrimaryLight,
+    secondary = SecondaryColor,
+    onSecondary = OnSecondaryLight,
+    secondaryContainer = SecondaryColor,
+    onSecondaryContainer = OnSecondaryLight,
+    background = BackgroundLight,
+    onBackground = OnBackgroundLight,
+    surface = SurfaceLight,
+    onSurface = OnSurfaceLight
 )
 
 private val DarkColors = darkColorScheme(
-    primary            = Purple200,
-    onPrimary          = Black,
-    primaryContainer   = Purple700,
-    onPrimaryContainer = White,
-
-    secondary            = Blue200,
-    onSecondary          = Black,
-    secondaryContainer   = Blue600,
-    onSecondaryContainer = White,
-
-    tertiary            = Orange200,
-    onTertiary          = Black,
-    tertiaryContainer   = Orange600,
-    onTertiaryContainer = White,
-
-    background     = Gray900,
-    onBackground   = White,
-    surface        = Gray800,
-    onSurface      = White,
+    primary = PrimaryColor,
+    onPrimary = OnPrimaryDark,
+    primaryContainer = PrimaryVariant,
+    onPrimaryContainer = OnPrimaryDark,
+    secondary = SecondaryColor,
+    onSecondary = OnSecondaryDark,
+    secondaryContainer = SecondaryColor,
+    onSecondaryContainer = OnSecondaryDark,
+    background = BackgroundDark,
+    onBackground = OnBackgroundDark,
+    surface = SurfaceDark,
+    onSurface = OnSurfaceDark
 )
 
 @Composable
@@ -57,7 +43,7 @@ fun TaskManagerTheme(
 ) {
     MaterialTheme(
         colorScheme = if (darkTheme) DarkColors else LightColors,
-        typography  = Typography,
-        content     = content
+        typography = Typography,
+        content = content
     )
 }

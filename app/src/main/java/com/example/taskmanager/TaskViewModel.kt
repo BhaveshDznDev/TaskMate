@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 
-class TaskViewModel( private val taskRepository: TaskRepository = Graph.taskRepository ): ViewModel() {
+class TaskViewModel(private val taskRepository: TaskRepository = Graph.taskRepository) : ViewModel() {
     var taskTitleState by mutableStateOf("")
     var taskDescriptionState by mutableStateOf("")
 
@@ -26,8 +26,8 @@ class TaskViewModel( private val taskRepository: TaskRepository = Graph.taskRepo
         }
     }
 
-    fun getTask(id: Long) : Flow<Task> {
-            return taskRepository.getTask(id)
+    fun getTask(id: Long): Flow<Task> {
+        return taskRepository.getTask(id)
     }
 
     fun addTask(task: Task) {
@@ -46,5 +46,9 @@ class TaskViewModel( private val taskRepository: TaskRepository = Graph.taskRepo
         viewModelScope.launch(Dispatchers.IO) {
             taskRepository.deleteTask(task)
         }
+    }
+
+    fun updateTask(task: Task) = viewModelScope.launch(Dispatchers.IO) {
+        taskRepository.updateTask(task)
     }
 }

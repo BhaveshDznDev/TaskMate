@@ -13,6 +13,8 @@ object Graph {
     }
 
     fun provide(context: Context) {
-        database = Room.databaseBuilder(context, TaskDatabase::class.java, "tasklist.db").build()
+        database = Room.databaseBuilder(context, TaskDatabase::class.java, "tasklist.db")
+            .fallbackToDestructiveMigration()
+            .build()
     }
 }
