@@ -36,7 +36,7 @@ fun AppBar(
 
     TopAppBar(
         modifier = Modifier.height(90.dp),
-        title = { Text(text = title, fontSize = 25.sp, modifier = Modifier.padding(top = 25.dp), fontStyle = FontStyle.Italic) },
+        title = { Text(text = title, fontSize = 25.sp, modifier = Modifier.padding(top = 25.dp), fontStyle = FontStyle.Italic, color = Color.White) },
         elevation = 3.dp,
         backgroundColor = colorResource(R.color.app_bar_color),
         navigationIcon = navigationIcon,
